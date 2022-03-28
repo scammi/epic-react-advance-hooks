@@ -41,16 +41,18 @@ function useAsync(initialState) {
     ...initialState
   })
 
-  const run = React.useCallback( (promise) => {
+  const run = React.useCallback( (promise, mounted) => {
     if (!promise) {
       return
     }
     dispatch({type: 'pending'})
     promise.then(
       data => {
+        if (!mounted) return
         dispatch({type: 'resolved', data})
       },
       error => {
+        if (!mounted) return
         dispatch({type: 'rejected', error})
       },
     );
@@ -59,7 +61,7 @@ function useAsync(initialState) {
   return {...state, run};
 }
 
-function PokemonInfo({pokemonName}) {
+function PokemonInfo({pokemonName,mounted}) {
 
   const {data, status, error, run} = useAsync({ status: pokemonName ? 'pending' : 'idle' })
 
@@ -69,7 +71,7 @@ function PokemonInfo({pokemonName}) {
     }
 
     const pokemonPromise = fetchPokemon(pokemonName)
-    run(pokemonPromise)
+    run(pokemonPromise, mounted)
   }, [pokemonName, run])
 
   console.log(data);
@@ -88,7 +90,7 @@ function PokemonInfo({pokemonName}) {
   }
 }
 
-function App() {
+function App({mounted}) {
   const [pokemonName, setPokemonName] = React.useState('')
 
   function handleSubmit(newPokemonName) {
@@ -105,7 +107,7 @@ function App() {
       <hr />
       <div className="pokemon-info">
         <PokemonErrorBoundary onReset={handleReset} resetKeys={[pokemonName]}>
-          <PokemonInfo pokemonName={pokemonName} />
+          <PokemonInfo pokemonName={pokemonName} mounted={mounted}/>
         </PokemonErrorBoundary>
       </div>
     </div>
@@ -125,7 +127,7 @@ function AppWithUnmountCheckbox() {
         Mount Component
       </label>
       <hr />
-      {mountApp ? <App /> : null}
+      {mountApp ? <App mounted={mountApp} /> : null}
     </div>
   )
 }
