@@ -3,8 +3,17 @@
 
 import * as React from 'react'
 
-// 🐨 create your CountContext here with React.createContext
 const CountContext = React.createContext() 
+
+const useCount = () => {
+  const context = React.useContext(CountContext)
+  if(!context) {
+    throw new Error('broken BROKEN !')
+  }
+
+  return context
+}
+
 const CounterProvider = ({children}) => {
 
   const [count, setCount] = React.useState(0)
@@ -20,17 +29,16 @@ const CounterProvider = ({children}) => {
 function CountDisplay() {
   // 🐨 get the count from useContext with the CountContext
   // const foo = React.useContext(FooContext)
-  const contextValue = React.useContext(CountContext) 
+  const [count, setCount] = useCount()
   
-  const count = contextValue[0]
 
   return <div>{`The current count is ${count}`}</div>
 }
 
 function Counter() {
   // 🐨 get the setCount from useContext with the CountContext
-  const contextValue = React.useContext(CountContext) 
-  const setCount = contextValue[1]
+  const [count, setCount] = useCount()
+  
   const increment = () => setCount(c => c + 1)
   return <button onClick={increment}>Increment count</button>
 }
